@@ -14,16 +14,20 @@ class MainActivity : AppCompatActivity() {
 
         val controller = findNavController(R.id.nav_host_fragment)
 
-        val prefs = this.getSharedPreferences(Constants.MY_PREFS_NAME, Context.MODE_PRIVATE)
+        // Read data from preferences
+        val prefs = this.getPreferences(MODE_PRIVATE)
         val token = prefs.getString("token", "")
+        val deadline = prefs.getString("deadline", "")
+
         Log.i("xxx", "token: " + token)
-        if( !token.equals("")) {
+        // @TODO - check the token's validity
+        val isValid = true
+        if (!token.equals("") && isValid ) {
             MyApplication.token = token!!
+            MyApplication.email = prefs.getString("email","")!!
+
             controller.navigate(R.id.listFragment)
         }
-
-
     }
-
 
 }

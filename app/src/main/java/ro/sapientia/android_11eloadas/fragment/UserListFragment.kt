@@ -20,7 +20,7 @@ class UserListFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val factory = UserListViewModelFactory(this.requireContext(), TrackerRepository())
+        val factory = UserListViewModelFactory(TrackerRepository())
         userListViewModel = ViewModelProvider(this, factory).get(UserListViewModel::class.java)
 
     }
@@ -41,12 +41,10 @@ class UserListFragment : Fragment() {
         }
         val editText: EditText = view.findViewById(R.id.editTextTextMultiLine)
         userListViewModel.readUsers()
-        userListViewModel.contentChange.observe(viewLifecycleOwner) {
+        userListViewModel.userList.observe(viewLifecycleOwner) {
             val userList = userListViewModel.userList.value
-            if (userList!!.size > 0) {
-                Log.i("xxx", "Users ${userList!!.toString()}")
-                editText.setText("User list size ${userList!!.size}")
-            }
+            editText.setText("User list size ${userList!!.size}")
+            Log.i("xxx", userList.toString())
         }
     }
 }

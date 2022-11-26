@@ -12,6 +12,7 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import ro.sapientia.android_11eloadas.MyApplication
 import ro.sapientia.android_11eloadas.R
 import ro.sapientia.android_11eloadas.model.LoginRequest
 import ro.sapientia.android_11eloadas.repository.TrackerRepository
@@ -23,10 +24,11 @@ import ro.sapientia.android_11eloadas.viewmodel.LoginViewModelFactory
 class LoginFragment : Fragment() {
 
     private lateinit var loginViewModel: LoginViewModel
+    private lateinit var editText1: EditText
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val factory = LoginViewModelFactory(this.requireContext(), TrackerRepository())
+        val factory = LoginViewModelFactory(TrackerRepository())
         loginViewModel = ViewModelProvider(this, factory).get(LoginViewModel::class.java)
     }
 
@@ -41,32 +43,36 @@ class LoginFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val editText1: EditText = view.findViewById(R.id.edittext_name_login_fragment)
+        editText1 = view.findViewById(R.id.edittext_name_login_fragment)
         val editText2: EditText = view.findViewById(R.id.edittext_password_login_fragment)
         val button: Button = view.findViewById(R.id.button_login_fragment)
 
-        val prefs = requireActivity().applicationContext.getSharedPreferences(Constants.MY_PREFS_NAME, Context.MODE_PRIVATE)
-        Log.i("xxx-LoginFragment-oVC", "email: " + prefs.getString("email", ""))
-        Log.i("xxx-LoginFragment-oVC", "password: " + prefs.getString("password", ""))
-
-        editText1.setText(prefs.getString("email", ""))
-        editText1.setText(prefs.getString("password", ""))
+        val prefs = requireActivity().getPreferences(Context.MODE_PRIVATE)
+        if (!prefs.getString("email", "").equals("")) {
+            editText1.setText(prefs.getString("email", ""))
+        }
 
         button.setOnClickListener {
             val email = editText1.text.toString().trim()
             val password = editText2.text.toString().trim()
-            if( email.isEmpty() || password.isEmpty()){
-                Toast.makeText(this.requireContext(),"Please, enter your email and password", Toast.LENGTH_LONG).show()
+            if (email.isEmpty() || password.isEmpty()) {
+                Toast.makeText(
+                    this.requireContext(),
+                    "Please, enter your email and password",
+                    Toast.LENGTH_LONG
+                ).show()
             } else {
-                try {
-                    loginViewModel.login(LoginRequest(password, email))
-                }catch(e: Exception){
-                    Log.i("xxx", "LoginViewModel - exception: ${e.toString()}")
-                    Toast.makeText(context, "Login failed: " + e.toString(), Toast.LENGTH_LONG).show()
-                }
+                loginViewModel.login(LoginRequest(email, password))
             }
         }
-        loginViewModel.token.observe(viewLifecycleOwner){
+
+        loginViewModel.loginResult.observe(viewLifecycleOwner) {
+            // Save data to preferences
+            val prefs = requireActivity().getPreferences(Context.MODE_PRIVATE)
+            val edit = prefs.edit()
+            edit.putString("token", MyApplication.token)
+            edit.putString("email", editText1.text.toString())
+            edit.apply()
             findNavController().navigate(R.id.action_loginFragment_to_listFragment)
         }
 

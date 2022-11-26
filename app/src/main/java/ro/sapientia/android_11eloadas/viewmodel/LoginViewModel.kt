@@ -1,7 +1,5 @@
 package ro.sapientia.android_11eloadas.viewmodel
 
-import android.content.Context
-import android.content.SharedPreferences
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -11,39 +9,39 @@ import kotlinx.coroutines.launch
 import ro.sapientia.android_11eloadas.MyApplication
 import ro.sapientia.android_11eloadas.model.LoginRequest
 import ro.sapientia.android_11eloadas.repository.TrackerRepository
-import ro.sapientia.android_11eloadas.util.Constants
+import ro.sapientia.android_11eloadas.model.LoginResult
 
 class LoginViewModelFactory(
-    private val context: Context,
     private val repository: TrackerRepository
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return LoginViewModel(context, repository) as T
+        return LoginViewModel(repository) as T
     }
 }
 
-class LoginViewModel(val context: Context, val repository: TrackerRepository) : ViewModel() {
-    // get from API
-    var token: MutableLiveData<String> = MutableLiveData()
+class LoginViewModel(val repository: TrackerRepository) : ViewModel() {
+
+    var loginResult: MutableLiveData<LoginResult> = MutableLiveData()
 
     fun login(request: LoginRequest) {
         viewModelScope.launch {
-            Log.i("xxx", request.toString())
-            val result = repository.login(request)
-            token.value = result.token
+            try {
+                val response = repository.login(request)
+                if (response.isSuccessful) {
 
-            MyApplication.token = result.token
-            // Save the token
-            val prefs = context.getSharedPreferences(Constants.MY_PREFS_NAME, Context.MODE_PRIVATE)
-            prefs.edit().putString("token", token.value)
-            prefs.edit().putString("email", request.email)
-            prefs.edit().putString("password", request.passwordKey)
-            prefs.edit().apply()
-            prefs.edit().commit()
+                    MyApplication.token = response.body()!!.token
+                    MyApplication.deadline = response.body()!!.deadline
 
-            Log.i("xxx", "email ${request.email}")
-            Log.i("xxx", "password ${request.passwordKey}")
-            Log.i("xxx", "token ${token.value}")
+                    loginResult.value = LoginResult.SUCCESS
+                    Log.i("xxx", response.body().toString())
+                } else {
+                    loginResult.value = LoginResult.INVALID_CREDENTIALS
+                    Log.i("xxx-body", response.body().toString())
+                }
+            } catch (e: Exception) {
+                loginResult.value = LoginResult.UNKNOWN_ERROR
+                Log.i("xxx", e.toString())
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 package ro.sapientia.android_11eloadas.api
 
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
@@ -11,9 +12,9 @@ import ro.sapientia.android_11eloadas.util.Constants
 
 interface TrackerApi {
     @POST(Constants.LOGIN_URL)
-    suspend fun login(@Body request: LoginRequest): LoginResponse
+    suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
 
     @GET(Constants.GET_USERS_URL)
-    suspend fun getUsers(@Header("token") token: String): List<User>
+    suspend fun getUsers(@Header("token") token: String): Response<List<User>>
 
 }

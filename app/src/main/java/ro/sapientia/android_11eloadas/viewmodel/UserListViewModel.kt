@@ -14,28 +14,30 @@ import java.lang.Exception
 
 
 class UserListViewModelFactory(
-    private val context: Context,
     private val repository: TrackerRepository
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return UserListViewModel(context, repository) as T
+        return UserListViewModel( repository) as T
     }
 }
 
-class UserListViewModel(val context: Context, val repository: TrackerRepository) : ViewModel() {
-    var userList = MutableLiveData<MutableList<User>>()
-    var contentChange = MutableLiveData<Int>()
+class UserListViewModel(val repository: TrackerRepository) : ViewModel() {
+    var userList = MutableLiveData<List<User>>()
 
     fun readUsers() {
-        userList.value = mutableListOf()
-        contentChange.value = 0
         viewModelScope.launch {
             try {
-                userList.postValue(repository.getUsers(MyApplication.token).toMutableList())
-                contentChange.postValue(1)
+                val response = repository.getUsers(MyApplication.token)
+                if(response.isSuccessful) {
+                    userList.value = response.body()
+                } else{
+                    Log.i("xxx-uvm", response.message())
+                }
             } catch (e: Exception) {
                 Log.i("xxx", e.toString())
             }
         }
     }
+
+
 }

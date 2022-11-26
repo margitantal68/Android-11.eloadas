@@ -16,11 +16,7 @@
         android:theme="@style/Theme.Android10eloadas"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
-        <activity
-            android:name=".SplashActivity"
-            android:exported="false">
 
-        </activity>
         <activity
             android:name=".MainActivity"
             android:exported="true">
