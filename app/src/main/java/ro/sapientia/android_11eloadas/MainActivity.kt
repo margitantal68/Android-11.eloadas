@@ -17,7 +17,7 @@ class MainActivity : AppCompatActivity() {
         // Read data from preferences
         val prefs = this.getPreferences(MODE_PRIVATE)
         val token = prefs.getString("token", "")
-        val deadline = prefs.getString("deadline", "")
+        val deadline = prefs.getLong("deadline", 0L)
 
         Log.i("xxx", "token: " + token)
         // @TODO - check the token's validity

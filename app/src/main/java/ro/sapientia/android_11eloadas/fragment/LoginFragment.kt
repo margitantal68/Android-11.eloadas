@@ -15,6 +15,7 @@ import androidx.navigation.fragment.findNavController
 import ro.sapientia.android_11eloadas.MyApplication
 import ro.sapientia.android_11eloadas.R
 import ro.sapientia.android_11eloadas.model.LoginRequest
+import ro.sapientia.android_11eloadas.model.LoginResult
 import ro.sapientia.android_11eloadas.repository.TrackerRepository
 import ro.sapientia.android_11eloadas.util.Constants
 import ro.sapientia.android_11eloadas.viewmodel.LoginViewModel
@@ -68,12 +69,22 @@ class LoginFragment : Fragment() {
 
         loginViewModel.loginResult.observe(viewLifecycleOwner) {
             // Save data to preferences
-            val prefs = requireActivity().getPreferences(Context.MODE_PRIVATE)
-            val edit = prefs.edit()
-            edit.putString("token", MyApplication.token)
-            edit.putString("email", editText1.text.toString())
-            edit.apply()
-            findNavController().navigate(R.id.action_loginFragment_to_listFragment)
+            if( it == LoginResult.INVALID_CREDENTIALS){
+                Toast.makeText(
+                    this.requireContext(),
+                    "Invalid credentials",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+            if ( it == LoginResult.SUCCESS ) {
+                val prefs = requireActivity().getPreferences(Context.MODE_PRIVATE)
+                val edit = prefs.edit()
+                edit.putString("token", MyApplication.token)
+                edit.putLong("deadline", MyApplication.deadline)
+                edit.putString("email", editText1.text.toString())
+                edit.apply()
+                findNavController().navigate(R.id.action_loginFragment_to_listFragment)
+            }
         }
 
     }

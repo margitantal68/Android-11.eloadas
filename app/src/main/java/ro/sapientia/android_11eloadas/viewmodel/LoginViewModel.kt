@@ -36,7 +36,7 @@ class LoginViewModel(val repository: TrackerRepository) : ViewModel() {
                     Log.i("xxx", response.body().toString())
                 } else {
                     loginResult.value = LoginResult.INVALID_CREDENTIALS
-                    Log.i("xxx-body", response.body().toString())
+                    Log.i("xxx", "Invalid credentials " + response.errorBody().toString()  )
                 }
             } catch (e: Exception) {
                 loginResult.value = LoginResult.UNKNOWN_ERROR
